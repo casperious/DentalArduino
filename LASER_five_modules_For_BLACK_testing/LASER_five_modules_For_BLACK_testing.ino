@@ -94,7 +94,7 @@ const char* password = "youthought101";
 const char* targetIP = "192.168.39.191"; // Update with your computer's IP
 const int targetPort = 12345;            // Same as the port in UE5
 unsigned int localPort = 8888; // Arduino's local port
-
+char packetBuffer[255]; //buffer to hold incoming packet
 WiFiUDP udp;
 
 //float roll = 0.0, pitch = 0.0, yaw = 0.0;
@@ -266,8 +266,22 @@ void playMicroVibration(uint8_t intensity)
   // Start the waveform sequence playback
   drv.go();
   // Optional: Print status for debugging
-  Serial.print("Playing micro vibration effect with intensity: ");
-  Serial.println(intensity);
+  //Serial.print("Playing micro vibration effect with intensity: ");
+  //Serial.println(intensity);
+}
+
+void playVibrationType(uint8_t intensity,uint8_t effect)
+{
+  // Set the intensity
+  drv.setRealtimeValue(intensity);
+  // Load a waveform sequence: we will use effect #1 which is a strong click
+  drv.setWaveform(0, effect);  // Play effect #51 (Buzz5 -20%)
+  drv.setWaveform(1, 0);  // End of sequence
+  // Start the waveform sequence playback
+  drv.go();
+  // Optional: Print status for debugging
+  Serial.print("Playing micro vibration effect with type: ");
+  Serial.println(effect);
 }
 
 void controlERM(float roll, float pitch) 
@@ -403,14 +417,15 @@ void loop()
            
                 myLSM.getAccel(&accelData);
                 myLSM.getGyro(&gyroData);
-                Serial.print("Accelerometer: "); 
+                /*Serial.print("Accelerometer: "); 
                 Serial.print("X: "); Serial.print(accelData.xData); Serial.print(" "); Serial.print("Y: "); Serial.print(accelData.yData); Serial.print(" "); Serial.print("Z: "); Serial.print(accelData.zData); Serial.println(" ");
                 Serial.print("Gyroscope: "); 
                 Serial.print("X: "); Serial.print(gyroData.xData);  Serial.print(" ");Serial.print("Y: "); Serial.print(gyroData.yData);Serial.print(" "); Serial.print("Z: "); Serial.print(gyroData.zData); Serial.println(" "); 
-               GetcalibrateIMU(ax_corrected, ay_corrected, az_corrected, gx_corrected, gy_corrected, gz_corrected);
+                */
+                GetcalibrateIMU(ax_corrected, ay_corrected, az_corrected, gx_corrected, gy_corrected, gz_corrected);
                 //acceleration = sqrt(ax_corrected * ax_corrected + ay_corrected * ay_corrected + az_corrected * az_corrected);
                 acceleration = sqrt(accelData.xData * accelData.xData + accelData.yData * accelData.yData + accelData.zData * accelData.zData); 
-                Serial.println(acceleration);
+                //Serial.println(acceleration);
                 unsigned long currentTime = millis();
                 float deltaTime = (currentTime - lastTime) / 1000.0;
                 lastTime = currentTime;
@@ -501,17 +516,56 @@ void loop()
                     udp.endPacket();
 
                     // Debug Output
-                    Serial.print("Position: X="); Serial.print(posX);
+                    /*Serial.print("Position: X="); Serial.print(posX);
                     Serial.print(" Y="); Serial.print(posY);
                     Serial.print(" Z="); Serial.println(posZ);
                     Serial.print("Rotation: Roll="); Serial.print(roll);
                     Serial.print(" Pitch="); Serial.print(pitch);
                     Serial.print(" Yaw="); Serial.println(yaw);
+                    */
                 }
+              int packetSize = udp.parsePacket();
+              if (packetSize) {
+                Serial.print("Received packet of size ");
+                Serial.println(packetSize);
+                //Serial.print("From ");
+                //IPAddress remoteIp = udp.remoteIP();
+                //Serial.print(remoteIp);
+                //Serial.print(", port ");
+                //Serial.println(udp.remotePort());
+                // read the packet into packetBufffer
+                int len = udp.read(packetBuffer, 255);
+                 pcaselect(1);
+                if (len > 0) {
+                  packetBuffer[len] = 0;
+                }
+                Serial.println("Contents:");
+                Serial.println(packetBuffer);
+                if (strcmp(packetBuffer, "Gingivitis") == 0) {
+                      drv.go();
+                     // playMicroVibration(intensity1);
+                      playVibrationType(intensity1, 14); // Strong Buzz
+                  } else if (strcmp(packetBuffer, "Tooth Decay") == 0) {
+                      drv.go();
+                     //  playMicroVibration(intensity1);
+                      playVibrationType(intensity1, 52); // Pulsing Strong
+                  } else if (strcmp(packetBuffer, "Periodontitis") == 0) {
+                      drv.go();
+                     //  playMicroVibration(intensity1);
+                     playVibrationType(intensity1, 7); // Soft Bump
+                  } else if (strcmp(packetBuffer, "Necrotic Pulp") == 0) {
+                      drv.go();
+                      playVibrationType(intensity1, 13); // Soft Fuzz
+                  } else {
+                      // Default or unknown packet handling
+                      Serial.println("Unknown packet received");
+                  }
 
+
+              }
 
             }
-                 Threshold_accel = acceleration;
+                 /*Threshold_accel = acceleration;
                   Threshold_accel_up = Threshold_accel + 100;
          
                    if (acceleration >= (threshold) && acceleration <= (Threshold_accel + 300))
@@ -528,7 +582,7 @@ void loop()
                         break;
                        } //end of if
          
-                    }
+                    }*/
             } //end of myLSM.checkStatus
           //pcaselect (0)
        
