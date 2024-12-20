@@ -87,11 +87,11 @@ DallasTemperature sensors(&oneWire);
   
 
 //variables and params for wifi connection to UE5 
-const char* ssid = "rando";
-const char* password = "youthought101";
+const char* ssid = "ABBADEAF01";
+const char* password = "akum3696";
 
 // Replace with your computer's IP and port
-const char* targetIP = "192.168.39.191"; // Update with your computer's IP
+const char* targetIP = "192.168.217.136"; // Update with your computer's IP
 const int targetPort = 12345;            // Same as the port in UE5
 unsigned int localPort = 8888; // Arduino's local port
 char packetBuffer[255]; //buffer to hold incoming packet
@@ -516,10 +516,10 @@ void loop()
                     udp.endPacket();
 
                     // Debug Output
-                    /*Serial.print("Position: X="); Serial.print(posX);
-                    Serial.print(" Y="); Serial.print(posY);
-                    Serial.print(" Z="); Serial.println(posZ);
-                    Serial.print("Rotation: Roll="); Serial.print(roll);
+                    //Serial.print("Position: X="); Serial.print(posX);
+                    //Serial.print(" Y="); Serial.print(posY);
+                    //Serial.print(" Z="); Serial.println(posZ);
+                    /*Serial.print("Rotation: Roll="); Serial.print(roll);
                     Serial.print(" Pitch="); Serial.print(pitch);
                     Serial.print(" Yaw="); Serial.println(yaw);
                     */
@@ -543,20 +543,24 @@ void loop()
                 Serial.println(packetBuffer);
                 if (strcmp(packetBuffer, "Gingivitis") == 0) {
                       drv.go();
-                     // playMicroVibration(intensity1);
-                      playVibrationType(intensity1, 14); // Strong Buzz
+                      playVibrationType(10, 13); // Soft Fuzz
                   } else if (strcmp(packetBuffer, "Tooth Decay") == 0) {
                       drv.go();
-                     //  playMicroVibration(intensity1);
-                      playVibrationType(intensity1, 52); // Pulsing Strong
+                      playVibrationType(100, 52); // Pulsing Strong
                   } else if (strcmp(packetBuffer, "Periodontitis") == 0) {
                       drv.go();
-                     //  playMicroVibration(intensity1);
-                     playVibrationType(intensity1, 7); // Soft Bump
+                     playVibrationType(10, 13); // Soft fuzz
                   } else if (strcmp(packetBuffer, "Necrotic Pulp") == 0) {
                       drv.go();
-                      playVibrationType(intensity1, 13); // Soft Fuzz
-                  } else {
+                      playVibrationType(90, 14); // Strong Buzz
+                  } else if (strcmp(packetBuffer, "Lower Gum")==0){
+                    drv.go();
+                    playVibrationType(10,7); // Soft Bump
+                  } else if (strcmp(packetBuffer, "Cavity")==0){
+                    drv.go();
+                    playVibrationType(90, 56); // Pulsing Sharp
+                  }
+                  else {
                       // Default or unknown packet handling
                       Serial.println("Unknown packet received");
                   }
